@@ -109,7 +109,7 @@ export default defineConfig({
         },
 
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/example/auth-kit-js' }
+            { icon: 'github', link: 'https://github.com/Xushnud9812/auth-kit-js' }
         ],
 
         footer: {
@@ -122,7 +122,7 @@ export default defineConfig({
         },
 
         editLink: {
-            pattern: 'https://github.com/example/auth-kit-js/edit/main/docs/:path',
+            pattern: 'https://github.com/Xushnud9812/auth-kit-js/edit/main/docs/:path',
             text: 'Edit this page on GitHub'
         },
 
@@ -138,6 +138,6 @@ export default defineConfig({
     lastUpdated: true,
 
     sitemap: {
-        hostname: 'https://example.github.io/auth-kit-js/'
+        hostname: 'https://Xushnud9812.github.io/auth-kit-js/'
     }
 })
