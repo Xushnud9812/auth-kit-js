@@ -1,214 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram WebApp Auth Example</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      /* Will be updated by Telegram theme */
-      background-color: var(--tg-theme-bg-color, #fff);
-      color: var(--tg-theme-text-color, #000);
-    }
-    
-    .container {
-      max-width: 400px;
-      width: 100%;
-    }
-    
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    
-    .user-card {
-      background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      text-align: center;
-    }
-    
-    .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin-bottom: 1rem;
-      background: var(--tg-theme-button-color, #007bff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      color: var(--tg-theme-button-text-color, #fff);
-      margin: 0 auto 1rem;
-    }
-    
-    .name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    
-    .username {
-      color: var(--tg-theme-hint-color, #888);
-    }
-    
-    .status {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
-    }
-    
-    .status--success {
-      background: #c6f6d5;
-      color: #22543d;
-    }
-    
-    .status--error {
-      background: #fed7d7;
-      color: #9b2c2c;
-    }
-    
-    .status--loading {
-      background: #e2e8f0;
-      color: #4a5568;
-    }
-    
-    .not-telegram {
-      text-align: center;
-      padding: 2rem;
-    }
-    
-    .btn {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: var(--tg-theme-button-color, #007bff);
-      color: var(--tg-theme-button-text-color, #fff);
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram WebApp Auth Demo</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        h1 { margin-bottom: 8px; }
+        .subtitle { color: var(--tg-theme-hint-color, #999); margin-bottom: 24px; }
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .card-title { font-weight: 600; margin-bottom: 8px; }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #eee);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--tg-theme-hint-color, #666); }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        .btn-primary {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, white);
+        }
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        .status.success { background: #c6f6d5; color: #22543d; }
+        .status.error { background: #fed7d7; color: #9b2c2c; }
+        .status.loading { background: #e8f4fd; color: #2b6cb0; }
+        .not-telegram {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .not-telegram h2 { margin-bottom: 16px; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>✈️ Telegram Auth</h1>
-    
-    <div id="telegram-content" style="display: none;">
-      <div class="user-card">
-        <div class="avatar" id="avatar"></div>
-        <div class="name" id="name">Loading...</div>
-        <div class="username" id="username"></div>
-      </div>
-      
-      <div class="status status--loading" id="status">
-        Verifying authentication...
-      </div>
+    <div class="container">
+        <div id="not-telegram" class="not-telegram" style="display: none;">
+            <h2>📱 Open in Telegram</h2>
+            <p>This app requires Telegram WebApp environment.</p>
+            <p style="margin-top: 16px; color: #666;">
+                Open this URL in a Telegram bot to use it.
+            </p>
+        </div>
+        
+        <div id="app" style="display: none;">
+            <h1>👋 Hello!</h1>
+            <p class="subtitle">Telegram WebApp Authentication Demo</p>
+            
+            <div class="card">
+                <div class="card-title">User Info</div>
+                <div class="info-row">
+                    <span class="info-label">Name</span>
+                    <span id="user-name">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Username</span>
+                    <span id="user-username">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">User ID</span>
+                    <span id="user-id">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Premium</span>
+                    <span id="user-premium">-</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Theme</div>
+                <div class="info-row">
+                    <span class="info-label">Color Scheme</span>
+                    <span id="theme-scheme">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Button Color</span>
+                    <span id="theme-button">-</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" id="verify-btn" onclick="verifyWithBackend()">
+                Verify with Backend
+            </button>
+            
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
     </div>
-    
-    <div id="not-telegram" class="not-telegram" style="display: none;">
-      <h2>🚫 Not a Telegram WebApp</h2>
-      <p>This page must be opened from within Telegram.</p>
-      <p style="margin-top: 1rem; color: #888;">
-        To test, open your Telegram bot and click the button that opens this Mini App.
-      </p>
-    </div>
-  </div>
 
-  <script type="module">
-    import {
-      isTelegramWebApp,
-      getTelegramUser,
-      getTelegramInitData,
-      initTelegramWebApp,
-      expandTelegramWebApp,
-    } from 'auth-kit-js/frontend';
-    
-    const AUTH_SERVER = 'http://localhost:3000';
-    
-    // Check if running in Telegram
-    if (!isTelegramWebApp()) {
-      document.getElementById('not-telegram').style.display = 'block';
-    } else {
-      // Show Telegram content
-      document.getElementById('telegram-content').style.display = 'block';
-      
-      // Initialize WebApp
-      initTelegramWebApp();
-      expandTelegramWebApp();
-      
-      // Get user info (for display only - this is unverified!)
-      const user = getTelegramUser();
-      
-      if (user) {
-        const initials = [user.first_name, user.last_name]
-          .filter(Boolean)
-          .map(n => n[0])
-          .join('');
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:3000/auth/telegram/webapp';
         
-        document.getElementById('avatar').textContent = initials || '?';
-        document.getElementById('name').textContent = 
-          [user.first_name, user.last_name].filter(Boolean).join(' ');
-        document.getElementById('username').textContent = 
-          user.username ? `@${user.username}` : '';
-      }
-      
-      // Verify with backend
-      verifyWithBackend();
-    }
-    
-    async function verifyWithBackend() {
-      const statusEl = document.getElementById('status');
-      
-      try {
-        const initData = getTelegramInitData();
+        // Check if running in Telegram
+        const tg = window.Telegram?.WebApp;
         
-        if (!initData) {
-          throw new Error('No initData available');
-        }
-        
-        const response = await fetch(`${AUTH_SERVER}/auth/telegram/webapp`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ initData }),
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          statusEl.className = 'status status--success';
-          statusEl.innerHTML = `
-            ✅ Authentication verified!<br>
-            <small>Token: ${result.token.slice(0, 20)}...</small>
-          `;
-          
-          // Store token for future API calls
-          localStorage.setItem('auth_token', result.token);
+        if (!tg || !tg.initData) {
+            document.getElementById('not-telegram').style.display = 'block';
         } else {
-          throw new Error(result.error || 'Verification failed');
+            // Initialize Telegram WebApp
+            tg.ready();
+            tg.expand();
+            
+            // Apply theme
+            document.body.style.backgroundColor = tg.themeParams.bg_color || '#fff';
+            document.body.style.color = tg.themeParams.text_color || '#000';
+            
+            // Show app
+            document.getElementById('app').style.display = 'block';
+            
+            // Display user info
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('user-name').textContent = 
+                    [user.first_name, user.last_name].filter(Boolean).join(' ');
+                document.getElementById('user-username').textContent = 
+                    user.username ? `@${user.username}` : '-';
+                document.getElementById('user-id').textContent = user.id;
+                document.getElementById('user-premium').textContent = 
+                    user.is_premium ? '⭐ Yes' : 'No';
+            }
+            
+            // Display theme info
+            document.getElementById('theme-scheme').textContent = tg.colorScheme || 'light';
+            document.getElementById('theme-button').textContent = 
+                tg.themeParams.button_color || '#0088cc';
         }
-      } catch (error) {
-        statusEl.className = 'status status--error';
-        statusEl.textContent = `❌ Error: ${error.message}`;
-      }
-    }
-  </script>
+        
+        // Verify with backend
+        async function verifyWithBackend() {
+            const statusEl = document.getElementById('status');
+            const btnEl = document.getElementById('verify-btn');
+            
+            statusEl.style.display = 'block';
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Verifying...';
+            btnEl.disabled = true;
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ initData: tg.initData }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Verified! Token: ${data.token?.substring(0, 20)}...`;
+                    
+                    // Close WebApp with data
+                    // tg.sendData(JSON.stringify({ token: data.token }));
+                } else {
+                    throw new Error(data.error || 'Verification failed');
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Error: ${error.message}`;
+            } finally {
+                btnEl.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>

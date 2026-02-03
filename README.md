@@ -2,9 +2,9 @@
 
 A **universal**, **secure**, and **tree-shakeable** authentication library for JavaScript/TypeScript, supporting:
 
-- 🔐 **Google OAuth2 / OpenID Connect**
-- 📘 **Facebook OAuth2**
-- ✈️ **Telegram** (WebApp initData + Login Widget)
+- **Google OAuth2**
+- **Facebook OAuth2**
+- **Telegram** (WebApp initData + Login Widget)
 
 ## Features
 

@@ -1,9 +1,17 @@
 {
-  "name": "auth-kit-js",
-  "version": "0.1.0",
+  "name": "@xushnud_bek/auth-kit-js",
+  "version": "0.1.2",
   "description": "Universal authentication library for Google, Facebook, and Telegram",
-  "author": "",
+  "author": "Xushnud <xushnud9812@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xushnud9812/auth-kit-js.git"
+  },
+  "homepage": "https://xushnud9812.github.io/auth-kit-js/",
+  "bugs": {
+    "url": "https://github.com/Xushnud9812/auth-kit-js/issues"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -54,7 +62,10 @@
     }
   },
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.cjs",
+    "dist/**/*.d.ts",
+    "dist/**/*.d.cts",
     "README.md"
   ],
   "scripts": {
