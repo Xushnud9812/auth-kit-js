@@ -8,10 +8,11 @@ export default defineConfig({
     description: 'Universal authentication library for JavaScript/TypeScript',
 
     // For GitHub Pages - change 'auth-kit-js' to your repo name
-    base: '/auth-kit-js/',
+    // Use / for Vercel, or /auth-kit-js/ for GitHub Pages
+    base: process.env.BASE_URL || '/',
 
     head: [
-        ['link', { rel: 'icon', type: 'image/svg+xml', href: '/auth-kit-js/logo.svg' }],
+        ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
         ['meta', { name: 'theme-color', content: '#667eea' }],
         ['meta', { property: 'og:type', content: 'website' }],
         ['meta', { property: 'og:title', content: 'Auth-Kit-JS' }],

@@ -39,6 +39,8 @@ jobs:
 
       - name: Build docs
         run: npm run docs:build
+        env:
+          BASE_URL: /auth-kit-js/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
