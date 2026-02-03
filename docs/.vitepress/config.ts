@@ -75,11 +75,6 @@ export default defineConfig({
                     items: [
                         { text: 'Google', link: '/providers/google' },
                         { text: 'Facebook', link: '/providers/facebook' },
-                    ]
-                },
-                {
-                    text: 'Other Providers',
-                    items: [
                         { text: 'Telegram', link: '/providers/telegram' },
                     ]
                 }
@@ -103,7 +98,6 @@ export default defineConfig({
                         { text: 'Overview', link: '/examples/' },
                         { text: 'Express Backend', link: '/examples/express' },
                         { text: 'React Frontend', link: '/examples/react' },
-                        { text: 'Telegram WebApp', link: '/examples/telegram-webapp' },
                     ]
                 }
             ]

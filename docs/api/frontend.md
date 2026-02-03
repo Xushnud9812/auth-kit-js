@@ -1,15 +1,15 @@
 # Frontend API
 
-Browser-only helpers for OAuth flows and Telegram WebApp.
+Browser-only helpers for OAuth flows.
 
-## OAuth Functions
+## Google & Facebook OAuth
 
 ### startOAuth
 
 Start OAuth flow with redirect.
 
 ```typescript
-import { startOAuth } from "auth-kit-js/frontend";
+import { startOAuth } from "@xushnud_bek/auth-kit-js/frontend";
 
 startOAuth({
   provider: "google",
@@ -25,7 +25,7 @@ startOAuth({
 Start OAuth flow in popup window.
 
 ```typescript
-import { startOAuthPopup } from "auth-kit-js/frontend";
+import { startOAuthPopup } from "@xushnud_bek/auth-kit-js/frontend";
 
 const result = await startOAuthPopup({
   provider: "google",
@@ -39,63 +39,70 @@ const result = await startOAuthPopup({
 Validate OAuth state parameter.
 
 ```typescript
-import { validateState } from "auth-kit-js/frontend";
+import { validateState } from "@xushnud_bek/auth-kit-js/frontend";
 
 const isValid = validateState(stateFromCallback);
 ```
 
-## Telegram WebApp Functions
+## Telegram OAuth
 
-### isTelegramWebApp
+### startTelegramOAuth
 
-Check if running inside Telegram.
+Start Telegram OAuth flow.
 
 ```typescript
-import { isTelegramWebApp } from "auth-kit-js/frontend";
+import { startTelegramOAuth } from "@xushnud_bek/auth-kit-js/frontend";
 
-if (isTelegramWebApp()) {
-  // Running in Telegram
+// Redirect mode
+startTelegramOAuth({
+  botId: "5323903014",
+  redirectUri: "http://localhost:3000/auth/telegram/callback",
+});
+
+// Popup mode
+const result = await startTelegramOAuth({
+  botId: "5323903014",
+  redirectUri: "http://localhost:3000/auth/telegram/callback",
+  popup: true,
+});
+```
+
+### handleTelegramOAuthCallback
+
+Handle Telegram OAuth callback on your callback page.
+
+```typescript
+import { handleTelegramOAuthCallback } from "@xushnud_bek/auth-kit-js/frontend";
+
+const authData = handleTelegramOAuthCallback();
+if (authData) {
+  // Send to backend for verification
+  fetch("/auth/telegram/oauth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(authData),
+  });
 }
 ```
 
-### getTelegramInitData
-
-Get raw initData string.
+## Types
 
 ```typescript
-import { getTelegramInitData } from "auth-kit-js/frontend";
+interface TelegramOAuthOptions {
+  botId: string;
+  redirectUri: string;
+  popup?: boolean;
+  popupWidth?: number;
+  popupHeight?: number;
+}
 
-const initData = getTelegramInitData();
-// Send to backend for verification
-```
-
-### getTelegramUser
-
-Get user from WebApp (unverified).
-
-```typescript
-import { getTelegramUser } from "auth-kit-js/frontend";
-
-const user = getTelegramUser();
-console.log(user?.first_name);
-```
-
-### initTelegramWebApp
-
-Signal ready to Telegram.
-
-```typescript
-import { initTelegramWebApp } from "auth-kit-js/frontend";
-
-initTelegramWebApp();
-```
-
-### verifyTelegramWithBackend
-
-Helper to verify with backend.
-
-```typescript
-import { verifyTelegramWithBackend } from "auth-kit-js/frontend";
-
-const result = await verifyTelegramWithBackend("/auth/telegram/webapp");
+interface TelegramOAuthResult {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: number;
+  hash: string;
+}
 ```

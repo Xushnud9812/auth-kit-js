@@ -1,15 +1,59 @@
 # Telegram Authentication
 
-Support for both Telegram WebApp (Mini App) and Login Widget authentication.
+Telegram authentication via `oauth.telegram.org` - the official Telegram OAuth flow.
 
-## WebApp (Mini App)
+## How It Works
 
-For Telegram Mini Apps running inside the Telegram client.
+1. User clicks "Login with Telegram" button
+2. User is redirected to `oauth.telegram.org`
+3. User enters phone number and verifies via Telegram
+4. User is redirected back to your site with auth data
+5. Your backend verifies the data
 
-### Backend Setup
+## Frontend Setup
 
 ```typescript
-import { createAuthRouter } from "auth-kit-js/express";
+import {
+  startTelegramOAuth,
+  handleTelegramOAuthCallback,
+} from "@xushnud_bek/auth-kit-js/frontend";
+
+// Start OAuth (redirect mode)
+document.getElementById("telegram-btn").onclick = () => {
+  startTelegramOAuth({
+    botId: "5323903014", // Your bot ID (from @BotFather)
+    redirectUri: "https://yoursite.com/auth/telegram/callback",
+  });
+};
+```
+
+## Callback Page
+
+```typescript
+import { handleTelegramOAuthCallback } from "@xushnud_bek/auth-kit-js/frontend";
+
+// On your callback page
+const authData = handleTelegramOAuthCallback();
+
+if (authData) {
+  // Send to backend for verification
+  const response = await fetch("/auth/telegram/oauth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(authData),
+  });
+
+  const { success, token } = await response.json();
+  if (success) {
+    localStorage.setItem("token", token);
+  }
+}
+```
+
+## Backend Setup
+
+```typescript
+import { createAuthRouter } from "@xushnud_bek/auth-kit-js/express";
 
 const authRouter = createAuthRouter({
   telegram: {
@@ -17,76 +61,43 @@ const authRouter = createAuthRouter({
     authDateTTL: 86400, // 24 hours (optional)
   },
   async onLogin(profile) {
-    return { token: createToken(profile) };
+    return { token: createJWT(profile) };
   },
 });
+
+app.use("/auth", authRouter);
 ```
 
-### Frontend (in Telegram WebApp)
+## Routes Created
+
+| Route                  | Description                |
+| ---------------------- | -------------------------- |
+| `POST /telegram/oauth` | Verify Telegram OAuth data |
+
+## Getting Bot ID
+
+Your bot ID is the numeric part before the colon in your bot token:
+
+```
+5323903014:AAH... → Bot ID = 5323903014
+```
+
+You can also use the helper function:
 
 ```typescript
-import {
-  isTelegramWebApp,
-  getTelegramInitData,
-  initTelegramWebApp,
-} from "auth-kit-js/frontend";
+import { extractBotId } from "@xushnud_bek/auth-kit-js";
 
-if (isTelegramWebApp()) {
-  initTelegramWebApp();
-
-  const initData = getTelegramInitData();
-
-  // Send to backend for verification
-  const response = await fetch("/auth/telegram/webapp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ initData }),
-  });
-}
+const botId = extractBotId(process.env.TELEGRAM_BOT_TOKEN!);
+// Returns: "5323903014"
 ```
-
-## Login Widget
-
-For web pages using the Telegram Login Widget.
-
-### HTML Widget
-
-```html
-<script
-  async
-  src="https://telegram.org/js/telegram-widget.js?22"
-  data-telegram-login="YOUR_BOT_NAME"
-  data-size="large"
-  data-onauth="onTelegramAuth(user)"
-  data-request-access="write"
-></script>
-
-<script>
-  function onTelegramAuth(user) {
-    fetch("/auth/telegram/widget", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(user),
-    });
-  }
-</script>
-```
-
-### Routes Created
-
-| Route                           | Description              |
-| ------------------------------- | ------------------------ |
-| `POST /telegram/webapp`         | Verify WebApp initData   |
-| `POST /telegram/widget`         | Verify Login Widget data |
-| `GET /telegram/widget/callback` | Redirect mode callback   |
 
 ## Security
 
-Telegram verification uses **HMAC-SHA256**:
+Telegram OAuth verification uses **HMAC-SHA256**:
 
-1. Creates secret key from SHA256(botToken)
+1. Creates secret key from HMAC-SHA256("WebAppData", botToken)
 2. Computes HMAC of data-check-string
-3. Compares with provided hash using timing-safe comparison
+3. Compares with provided hash
 4. Validates auth_date TTL (default: 24 hours)
 
 ## Profile Data
@@ -97,10 +108,11 @@ interface NormalizedProfile {
   providerUserId: string; // Telegram user ID
   name: string; // First + Last name
   avatarUrl?: string; // Photo URL (if available)
-  raw: TelegramInitData; // Original data
+  email: undefined; // Telegram doesn't provide email
+  raw: TelegramOAuthData;
 }
 ```
 
-::: tip
-Telegram **does not** provide user email addresses.
+::: warning
+Telegram **does not** provide user email addresses. Plan your user flow accordingly.
 :::

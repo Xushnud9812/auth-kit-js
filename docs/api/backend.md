@@ -9,7 +9,7 @@ Node.js-only verification and callback handlers.
 Handle OAuth callback with state validation.
 
 ```typescript
-import { handleOAuthCallback } from "auth-kit-js/backend";
+import { handleOAuthCallback } from "@xushnud_bek/auth-kit-js/backend";
 
 const profile = await handleOAuthCallback({
   provider: "google",
@@ -26,7 +26,7 @@ const profile = await handleOAuthCallback({
 Create reusable OAuth handler.
 
 ```typescript
-import { createOAuthHandler } from "auth-kit-js/backend";
+import { createOAuthHandler } from "@xushnud_bek/auth-kit-js/backend";
 
 const oauth = createOAuthHandler({
   google: googleConfig,
@@ -42,32 +42,19 @@ const profile = await oauth.handleCallback(
 );
 ```
 
-## Telegram Verification
+## Telegram OAuth Verification
 
-### verifyTelegramWebApp
+### verifyTelegramOAuth
 
-Verify Telegram WebApp initData.
-
-```typescript
-import { verifyTelegramWebApp } from "auth-kit-js/backend";
-
-const profile = await verifyTelegramWebApp(
-  initData,
-  process.env.TELEGRAM_BOT_TOKEN!,
-  { authDateTTL: 86400 },
-);
-```
-
-### verifyTelegramLoginWidget
-
-Verify Login Widget callback.
+Verify Telegram OAuth callback data.
 
 ```typescript
-import { verifyTelegramLoginWidget } from "auth-kit-js/backend";
+import { verifyTelegramOAuth } from "@xushnud_bek/auth-kit-js/backend";
 
-const profile = await verifyTelegramLoginWidget(
-  widgetData,
+const profile = await verifyTelegramOAuth(
+  authData, // TelegramOAuthData from frontend
   process.env.TELEGRAM_BOT_TOKEN!,
+  { authDateTTL: 86400 }, // 24 hours
 );
 ```
 
@@ -76,12 +63,35 @@ const profile = await verifyTelegramLoginWidget(
 Create reusable Telegram handler.
 
 ```typescript
-import { createTelegramHandler } from "auth-kit-js/backend";
+import { createTelegramHandler } from "@xushnud_bek/auth-kit-js/backend";
 
-const telegram = createTelegramHandler(process.env.TELEGRAM_BOT_TOKEN!, {
+const telegram = createTelegramHandler({
+  botToken: process.env.TELEGRAM_BOT_TOKEN!,
   authDateTTL: 86400,
 });
 
-const profile = await telegram.verifyWebApp(initData);
-const profile2 = await telegram.verifyWidget(widgetData);
+const profile = await telegram.verify(authData);
+```
+
+## Types
+
+```typescript
+interface TelegramOAuthData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: number;
+  hash: string;
+}
+
+interface NormalizedProfile {
+  provider: "google" | "facebook" | "telegram";
+  providerUserId: string;
+  email?: string;
+  name?: string;
+  avatarUrl?: string;
+  raw: unknown;
+}
 ```
