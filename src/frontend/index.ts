@@ -11,7 +11,7 @@ export {
     createButtonHelper,
 } from './buttons.js';
 
-// OAuth helpers
+// OAuth helpers (Google, Facebook)
 export {
     startOAuth,
     startOAuthPopup,
@@ -20,15 +20,10 @@ export {
     type StartOAuthOptions,
 } from './oauth.js';
 
-// Telegram WebApp helpers
+// Telegram OAuth helpers
 export {
-    isTelegramWebApp,
-    getTelegramWebApp,
-    getTelegramInitData,
-    getTelegramUser,
-    getTelegramTheme,
-    initTelegramWebApp,
-    expandTelegramWebApp,
-    closeTelegramWebApp,
-    verifyTelegramWithBackend,
+    startTelegramOAuth,
+    handleTelegramOAuthCallback,
+    type TelegramOAuthOptions,
+    type TelegramOAuthResult,
 } from './telegram.js';

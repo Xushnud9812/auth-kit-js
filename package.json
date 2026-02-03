@@ -1,6 +1,6 @@
 {
   "name": "@xushnud_bek/auth-kit-js",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Universal authentication library for Google, Facebook, and Telegram",
   "author": "Xushnud <xushnud9812@gmail.com>",
   "license": "MIT",

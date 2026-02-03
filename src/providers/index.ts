@@ -35,19 +35,16 @@ export type {
     FacebookUserProfile,
 } from './facebook/index.js';
 
-// Telegram
+// Telegram OAuth
 export * as telegram from './telegram/index.js';
 export {
-    verifyTelegramWebApp,
-    verifyTelegramLoginWidget,
-    parseWebAppInitData,
-    parseLoginWidgetData,
-    normalizeTelegramUser,
-    normalizeTelegramLoginWidget,
+    buildTelegramOAuthUrl,
+    parseTelegramOAuthCallback,
+    extractBotId,
+    normalizeOAuthProfile,
 } from './telegram/index.js';
 export type {
     TelegramUser,
-    TelegramWebAppInitData,
-    TelegramLoginWidgetData,
-    TelegramVerifyOptions,
+    TelegramOAuthConfig,
+    TelegramOAuthCallbackData,
 } from './telegram/index.js';

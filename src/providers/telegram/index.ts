@@ -1,24 +1,18 @@
 /**
  * Auth-Kit-JS: Telegram Provider
  * 
- * Re-exports all Telegram authentication functionality
+ * Telegram OAuth authentication via oauth.telegram.org
  */
 
 // Types
 export * from './types.js';
 
-// WebApp verification
+// OAuth (oauth.telegram.org)
 export {
-    parseWebAppInitData,
-    verifyWebAppInitData,
-    verifyTelegramWebApp,
-    normalizeTelegramUser,
-} from './webapp.js';
-
-// Login Widget verification
-export {
-    parseLoginWidgetData,
-    verifyLoginWidgetData,
-    verifyTelegramLoginWidget,
-    normalizeTelegramLoginWidget,
-} from './widget.js';
+    buildTelegramOAuthUrl,
+    parseTelegramOAuthCallback,
+    extractBotId,
+    normalizeOAuthProfile,
+    type TelegramOAuthConfig,
+    type TelegramOAuthCallbackData,
+} from './oauth.js';

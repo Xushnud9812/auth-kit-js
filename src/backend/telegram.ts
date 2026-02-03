@@ -1,56 +1,108 @@
 /**
- * Auth-Kit-JS: Backend Telegram Handler
+ * Auth-Kit-JS: Backend Telegram OAuth Handler
  * 
- * Server-side Telegram verification
+ * Server-side Telegram OAuth verification
  */
 
-import { verifyTelegramWebApp as verifyWebApp } from '../providers/telegram/webapp.js';
-import { verifyTelegramLoginWidget as verifyWidget } from '../providers/telegram/widget.js';
+import { createHmac } from 'crypto';
 import type { NormalizedProfile, TelegramConfig } from '../core/types.js';
-import type { TelegramVerifyOptions } from '../providers/telegram/types.js';
-
-export { verifyWebApp as verifyTelegramWebApp };
-export { verifyWidget as verifyTelegramLoginWidget };
+import { TelegramVerificationError } from '../core/errors.js';
 
 /**
- * Create Telegram verification handler with pre-configured options
- * 
- * @param config - Telegram configuration
- * @returns Verification functions
+ * Telegram OAuth callback data
  */
-export function createTelegramHandler(config: TelegramConfig) {
-    const options: TelegramVerifyOptions = {
-        authDateTTL: config.authDateTTL,
-    };
+export interface TelegramOAuthData {
+    id: number;
+    first_name: string;
+    last_name?: string;
+    username?: string;
+    photo_url?: string;
+    auth_date: number;
+    hash: string;
+}
+
+/**
+ * Verify Telegram OAuth data
+ * 
+ * @param data - OAuth callback data from client
+ * @param botToken - Your Telegram bot token
+ * @param options - Verification options
+ * @returns Normalized user profile
+ */
+export async function verifyTelegramOAuth(
+    data: TelegramOAuthData,
+    botToken: string,
+    options: { authDateTTL?: number } = {}
+): Promise<NormalizedProfile> {
+    const { hash, ...userData } = data;
+
+    // Check auth_date TTL
+    const authDateTTL = options.authDateTTL ?? 86400; // 24 hours default
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (currentTime - data.auth_date > authDateTTL) {
+        throw new TelegramVerificationError('expired');
+    }
+
+    // Build data check string (sorted alphabetically)
+    const dataCheckArr: string[] = [];
+    const sortedKeys = Object.keys(userData).sort();
+
+    for (const key of sortedKeys) {
+        const value = userData[key as keyof typeof userData];
+        if (value !== undefined) {
+            dataCheckArr.push(`${key}=${value}`);
+        }
+    }
+
+    const dataCheckString = dataCheckArr.join('\n');
+
+    // Create secret key from bot token
+    const secretKey = createHmac('sha256', 'WebAppData')
+        .update(botToken)
+        .digest();
+
+    // Calculate expected hash
+    const expectedHash = createHmac('sha256', secretKey)
+        .update(dataCheckString)
+        .digest('hex');
+
+    // Verify hash
+    if (hash !== expectedHash) {
+        throw new TelegramVerificationError('invalid_hash');
+    }
+
+    // Return normalized profile
+    const name = [data.first_name, data.last_name].filter(Boolean).join(' ');
 
     return {
+        provider: 'telegram',
+        providerUserId: String(data.id),
+        name: name || undefined,
+        avatarUrl: data.photo_url,
+        email: undefined, // Telegram doesn't provide email
+        raw: data,
+    };
+}
+
+/**
+ * Create Telegram OAuth handler with pre-configured options
+ * 
+ * @param config - Telegram configuration
+ * @returns Verification function
+ */
+export function createTelegramHandler(config: TelegramConfig) {
+    return {
         /**
-         * Verify Telegram WebApp initData
+         * Verify Telegram OAuth data
          * 
-         * @param initData - Raw initData string from Telegram WebApp
+         * @param data - OAuth callback data
          * @returns Normalized user profile
          */
-        async verifyWebApp(initData: string): Promise<NormalizedProfile> {
-            return verifyWebApp(initData, config.botToken, options);
-        },
-
-        /**
-         * Verify Telegram Login Widget data
-         * 
-         * @param data - Widget callback data
-         * @returns Normalized user profile
-         */
-        async verifyLoginWidget(
-            data: Record<string, string | number | undefined>
-        ): Promise<NormalizedProfile> {
-            return verifyWidget(data, config.botToken, options);
-        },
-
-        /**
-         * Get verification options
-         */
-        getOptions(): TelegramVerifyOptions {
-            return { ...options };
+        async verify(data: TelegramOAuthData): Promise<NormalizedProfile> {
+            return verifyTelegramOAuth(data, config.botToken, {
+                authDateTTL: config.authDateTTL,
+            });
         },
     };
 }

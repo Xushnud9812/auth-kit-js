@@ -14,6 +14,7 @@ export * from './frontend/index.js';
 export {
     buildGoogleAuthUrl,
     buildFacebookAuthUrl,
+    buildTelegramOAuthUrl,
     GOOGLE_DEFAULT_SCOPES,
     FACEBOOK_DEFAULT_SCOPES,
     GOOGLE_ENDPOINTS,
@@ -24,5 +25,5 @@ export type {
     GoogleConfig,
     FacebookConfig,
     TelegramUser,
-    TelegramWebAppInitData,
+    TelegramOAuthConfig,
 } from './providers/index.js';

@@ -9,8 +9,7 @@ import { buildGoogleAuthUrl, GOOGLE_DEFAULT_SCOPES } from '../../providers/googl
 import { buildFacebookAuthUrl, FACEBOOK_DEFAULT_SCOPES } from '../../providers/facebook/oauth.js';
 import { handleGoogleCallback } from '../../providers/google/verify.js';
 import { handleFacebookCallback } from '../../providers/facebook/verify.js';
-import { verifyTelegramWebApp } from '../../providers/telegram/webapp.js';
-import { verifyTelegramLoginWidget } from '../../providers/telegram/widget.js';
+import { verifyTelegramOAuth, type TelegramOAuthData } from '../../backend/telegram.js';
 import { AuthKitError, InvalidStateError } from '../../core/errors.js';
 import type { NormalizedProfile, GoogleOAuthConfig, FacebookOAuthConfig, TelegramConfig } from '../../core/types.js';
 
@@ -86,8 +85,7 @@ const DEFAULT_COOKIE_OPTIONS = {
  * - GET /google/callback - Handle Google callback
  * - GET /facebook - Start Facebook OAuth
  * - GET /facebook/callback - Handle Facebook callback
- * - POST /telegram/webapp - Verify Telegram WebApp
- * - POST /telegram/widget - Verify Telegram Login Widget
+ * - POST /telegram/oauth - Verify Telegram OAuth callback data
  * 
  * @param config - Router configuration
  * @returns Express Router
@@ -299,59 +297,17 @@ export function createAuthRouter(config: AuthRouterConfig): ExpressRouter {
     // ==========================================================================
 
     if (config.telegram) {
-        // Verify Telegram WebApp
-        router.post('/telegram/webapp', async (req: ExpressRequest, res: ExpressResponse) => {
+        // Verify Telegram OAuth callback data
+        router.post('/telegram/oauth', async (req: ExpressRequest, res: ExpressResponse) => {
             try {
-                const initData = req.body?.initData;
+                const data = req.body as TelegramOAuthData;
 
-                if (!initData || typeof initData !== 'string') {
-                    throw new AuthKitError('Missing initData', 'MISSING_DATA');
+                if (!data || !data.id || !data.hash) {
+                    throw new AuthKitError('Missing or invalid Telegram OAuth data', 'INVALID_DATA');
                 }
 
-                const profile = await verifyTelegramWebApp(
-                    initData,
-                    config.telegram!.botToken,
-                    { authDateTTL: config.telegram!.authDateTTL }
-                );
-
-                await handleSuccess(profile, req, res);
-            } catch (error) {
-                handleError(error instanceof Error ? error : new Error(String(error)), req, res);
-            }
-        });
-
-        // Verify Telegram Login Widget
-        router.post('/telegram/widget', async (req: ExpressRequest, res: ExpressResponse) => {
-            try {
-                const widgetData = req.body;
-
-                if (!widgetData || !widgetData.id || !widgetData.hash) {
-                    throw new AuthKitError('Invalid widget data', 'INVALID_DATA');
-                }
-
-                const profile = await verifyTelegramLoginWidget(
-                    widgetData as Record<string, string | number | undefined>,
-                    config.telegram!.botToken,
-                    { authDateTTL: config.telegram!.authDateTTL }
-                );
-
-                await handleSuccess(profile, req, res);
-            } catch (error) {
-                handleError(error instanceof Error ? error : new Error(String(error)), req, res);
-            }
-        });
-
-        // Alternative: GET endpoint for Login Widget redirect mode
-        router.get('/telegram/widget/callback', async (req: ExpressRequest, res: ExpressResponse) => {
-            try {
-                const widgetData = req.query;
-
-                if (!widgetData || !widgetData.id || !widgetData.hash) {
-                    throw new AuthKitError('Invalid widget data', 'INVALID_DATA');
-                }
-
-                const profile = await verifyTelegramLoginWidget(
-                    widgetData as Record<string, string | number | undefined>,
+                const profile = await verifyTelegramOAuth(
+                    data,
                     config.telegram!.botToken,
                     { authDateTTL: config.telegram!.authDateTTL }
                 );

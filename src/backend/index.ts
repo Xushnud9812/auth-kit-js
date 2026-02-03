@@ -4,7 +4,7 @@
  * Node.js-only authentication handlers
  */
 
-// OAuth handlers
+// OAuth handlers (Google, Facebook)
 export {
     handleOAuthCallback,
     createOAuthHandler,
@@ -12,11 +12,11 @@ export {
     type OAuthConfigMap,
 } from './oauth.js';
 
-// Telegram handlers
+// Telegram OAuth handler
 export {
-    verifyTelegramWebApp,
-    verifyTelegramLoginWidget,
+    verifyTelegramOAuth,
     createTelegramHandler,
+    type TelegramOAuthData,
 } from './telegram.js';
 
 // Re-export provider verification functions
